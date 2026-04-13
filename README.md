@@ -1,4 +1,10 @@
 # 🐄 MilkFlow — Dairy Farm Management System
+![Status](https://img.shields.io/badge/Status-Active-success)
+![Python](https://img.shields.io/badge/Python-Backend-green?logo=python&logoColor=white)
+![Django](https://img.shields.io/badge/Django-Framework-darkgreen?logo=django&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-Database-blue?logo=mysql&logoColor=white)
+![HTML5](https://img.shields.io/badge/HTML5-Markup-orange?logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-Styling-blue?logo=css3&logoColor=white)
 
 A complete Django web application for dairy farm management.
 
