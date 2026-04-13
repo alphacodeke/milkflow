@@ -1,0 +1,79 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="page-title">👥 {{ title }}</h1></div>
+  <a href="{% url 'employee_list' %}" class="btn btn-ghost">← Back</a>
+</div>
+<div style="max-width:600px">
+  <div class="card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input name="full_name" type="text" class="form-control {% if form.full_name.errors %}is-invalid{% endif %}"
+                 value="{{ form.full_name.value|default:'' }}" placeholder="Jane Wanjiku" required/>
+          {% if form.full_name.errors %}<div class="field-errors">{{ form.full_name.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select name="role" class="form-control form-select">
+            {% for val,label in form.fields.role.choices %}
+            <option value="{{ val }}" {% if form.role.value == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input name="phone" type="tel" class="form-control"
+                 value="{{ form.phone.value|default:'' }}" placeholder="+254 7XX XXX XXX"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input name="email" type="email" class="form-control"
+                 value="{{ form.email.value|default:'' }}" placeholder="jane@example.com"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">National ID</label>
+          <input name="national_id" type="text" class="form-control"
+                 value="{{ form.national_id.value|default:'' }}" placeholder="12345678"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hire Date</label>
+          <input name="hire_date" type="date" class="form-control"
+                 value="{{ form.hire_date.value|default:'' }}"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Monthly Salary (KES)</label>
+          <input name="monthly_salary" type="number" step="0.01" min="0" class="form-control"
+                 value="{{ form.monthly_salary.value|default:'0' }}" placeholder="15000.00"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control form-select">
+            {% for val,label in form.fields.status.choices %}
+            <option value="{{ val }}" {% if form.status.value == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea name="notes" class="form-control" rows="2"
+                  placeholder="Additional notes...">{{ form.notes.value|default:'' }}</textarea>
+      </div>
+      <div style="display:flex;gap:.75rem">
+        <button type="submit" class="btn btn-primary">💾 Save Employee</button>
+        <a href="{% url 'employee_list' %}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

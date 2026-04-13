@@ -1,0 +1,70 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="page-title">✅ {{ title }}</h1></div>
+  <a href="{% url 'task_list' %}" class="btn btn-ghost">← Back</a>
+</div>
+<div style="max-width:560px">
+  <div class="card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Task Title *</label>
+        <input name="title" type="text" class="form-control {% if form.title.errors %}is-invalid{% endif %}"
+               value="{{ form.title.value|default:'' }}" placeholder="e.g. Vaccinate FMD — all cows" required/>
+        {% if form.title.errors %}<div class="field-errors">{{ form.title.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Task Type</label>
+          <select name="task_type" class="form-control form-select">
+            {% for val,label in form.fields.task_type.choices %}
+            <option value="{{ val }}" {% if form.task_type.value == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select name="priority" class="form-control form-select">
+            {% for val,label in form.fields.priority.choices %}
+            <option value="{{ val }}" {% if form.priority.value == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Due Date *</label>
+          <input name="due_date" type="date" class="form-control {% if form.due_date.errors %}is-invalid{% endif %}"
+                 value="{{ form.due_date.value|default:'' }}" required/>
+          {% if form.due_date.errors %}<div class="field-errors">{{ form.due_date.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Linked Cow (Optional)</label>
+          <select name="cow" class="form-control form-select">
+            <option value="">— All / General —</option>
+            {% for cow in form.fields.cow.queryset %}
+            <option value="{{ cow.pk }}" {% if form.cow.value|stringformat:"s" == cow.pk|stringformat:"s" %}selected{% endif %}>
+              {{ cow.tag_number }}{% if cow.name %} — {{ cow.name }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description / Notes</label>
+        <textarea name="description" class="form-control" rows="3"
+                  placeholder="Details, instructions, quantities...">{{ form.description.value|default:'' }}</textarea>
+      </div>
+      {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors.0 }}</div>
+      {% endif %}
+      <div style="display:flex;gap:.75rem">
+        <button type="submit" class="btn btn-primary">💾 Save Task</button>
+        <a href="{% url 'task_list' %}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

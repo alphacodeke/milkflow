@@ -1,0 +1,120 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ cow }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">🐄 {{ cow.tag_number }} — {{ cow.name|default:"Unnamed" }}</h1>
+    <p class="page-subtitle">{{ cow.breed }} · {{ cow.age_display }} old</p>
+  </div>
+  <div style="display:flex;gap:.5rem">
+    <a href="{% url 'cow_edit' cow.pk %}" class="btn btn-outline">✏️ Edit</a>
+    <a href="{% url 'cow_list' %}" class="btn btn-ghost">← Back</a>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- COW INFO -->
+  <div class="card">
+    <div class="card-title">📋 Cow Profile</div>
+    <table style="width:100%;font-size:.9rem">
+      <tr><td style="color:var(--text-muted);padding:.4rem 0;width:40%">Tag Number</td><td><strong>{{ cow.tag_number }}</strong></td></tr>
+      <tr><td style="color:var(--text-muted);padding:.4rem 0">Name</td><td>{{ cow.name|default:"—" }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:.4rem 0">Breed</td><td>{{ cow.breed }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:.4rem 0">Status</td><td><span class="status-{{ cow.status }}">{{ cow.get_status_display }}</span></td></tr>
+      <tr><td style="color:var(--text-muted);padding:.4rem 0">Date of Birth</td><td>{{ cow.date_of_birth|default:"Unknown" }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:.4rem 0">Age</td><td>{{ cow.age_display }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:.4rem 0">Acquired</td><td>{{ cow.date_acquired|default:"—" }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:.4rem 0">Weight</td><td>{{ cow.weight_kg|default:"—" }}{% if cow.weight_kg %} kg{% endif %}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:.4rem 0">30-day Milk</td><td><strong style="color:var(--green)">{{ total_milk_30|floatformat:1 }} L</strong></td></tr>
+    </table>
+    {% if cow.notes %}
+    <div style="margin-top:.75rem;padding:.75rem;background:var(--bg);border-radius:6px;font-size:.88rem">
+      {{ cow.notes }}
+    </div>
+    {% endif %}
+    <div style="display:flex;gap:.5rem;margin-top:1rem">
+      <a href="{% url 'milk_add' %}" class="btn btn-primary btn-sm">🥛 Record Milk</a>
+      <a href="{% url 'health_add' %}" class="btn btn-outline btn-sm">💊 Add Health</a>
+      <button class="btn btn-danger btn-sm" onclick="confirmDelete('{% url 'cow_delete' cow.pk %}', '{{ cow.tag_number }}')">🗑️</button>
+    </div>
+  </div>
+
+  <!-- UPCOMING TASKS -->
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between">
+      <span>✅ Pending Tasks</span>
+      <a href="{% url 'task_add' %}" class="btn btn-sm btn-outline">+ Add</a>
+    </div>
+    {% if tasks %}
+    {% for task in tasks %}
+    <div class="task-item {% if task.is_overdue %}overdue{% endif %}">
+      <div class="priority-dot priority-{{ task.priority }}"></div>
+      <div style="flex:1">
+        <div class="task-title">{{ task.title }}</div>
+        <div class="task-cow">{{ task.get_task_type_display }}</div>
+      </div>
+      <div class="task-date">{{ task.due_date }}</div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p style="color:var(--text-muted);font-size:.875rem">No pending tasks for this cow.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- MILK RECORDS -->
+<div class="card" style="margin-top:1rem">
+  <div class="card-title" style="justify-content:space-between">
+    <span>🥛 Recent Milk Records</span>
+    <a href="{% url 'milk_add' %}" class="btn btn-sm btn-primary">+ Record</a>
+  </div>
+  {% if recent_milk %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Date</th><th>AM (L)</th><th>PM (L)</th><th>Total (L)</th><th>Notes</th></tr></thead>
+      <tbody>
+      {% for r in recent_milk %}
+      <tr>
+        <td>{{ r.record_date }}</td>
+        <td>{{ r.am_yield }}</td>
+        <td>{{ r.pm_yield }}</td>
+        <td><strong>{{ r.total_yield|floatformat:2 }}</strong></td>
+        <td class="text-muted truncate">{{ r.notes|default:"—" }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="color:var(--text-muted);font-size:.875rem">No milk records for this cow yet.</p>
+  {% endif %}
+</div>
+
+<!-- HEALTH EVENTS -->
+<div class="card" style="margin-top:1rem">
+  <div class="card-title" style="justify-content:space-between">
+    <span>💊 Health Events</span>
+    <a href="{% url 'health_add' %}" class="btn btn-sm btn-outline">+ Add</a>
+  </div>
+  {% if health_events %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Date</th><th>Type</th><th>Status</th><th>Vet</th><th>Cost</th></tr></thead>
+      <tbody>
+      {% for e in health_events %}
+      <tr>
+        <td>{{ e.event_date }}</td>
+        <td>{{ e.get_event_type_display }}</td>
+        <td><span class="badge badge-{% if e.status == 'resolved' %}green{% elif e.status == 'open' %}amber{% else %}grey{% endif %}">{{ e.get_status_display }}</span></td>
+        <td>{{ e.vet_name|default:"—" }}</td>
+        <td>KES {{ e.cost|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="color:var(--text-muted);font-size:.875rem">No health events recorded.</p>
+  {% endif %}
+</div>
+{% endblock %}

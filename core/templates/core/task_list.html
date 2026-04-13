@@ -1,0 +1,81 @@
+{% extends 'core/base.html' %}
+{% block title %}Tasks{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">✅ Scheduled Tasks</h1>
+    {% if overdue_count > 0 %}
+    <p class="page-subtitle" style="color:var(--red)">⚠️ {{ overdue_count }} overdue task{{ overdue_count|pluralize }}</p>
+    {% else %}
+    <p class="page-subtitle">Stay on top of farm activities</p>
+    {% endif %}
+  </div>
+  <a href="{% url 'task_add' %}" class="btn btn-primary">+ Schedule Task</a>
+</div>
+
+<!-- STATUS TABS -->
+<div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">
+  <
+  <a href="?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-primary{% else %}btn-ghost{% endif %}">⏳ Pending</a>
+  <a href="?status=in_progress" class="btn btn-sm {% if status_filter == 'in_progress' %}btn-amber{% else %}btn-ghost{% endif %}">🔄 In Progress</a>
+  <a href="?status=completed" class="btn btn-sm {% if status_filter == 'completed' %}btn-outline{% else %}btn-ghost{% endif %}">✅ Completed</a>
+  <a href="?status=all" class="btn btn-sm {% if status_filter == 'all' %}btn-outline{% else %}btn-ghost{% endif %}">All</a>
+</div>
+
+{% if tasks %}
+<div style="display:flex;flex-direction:column;gap:.5rem">
+  {% for task in tasks %}
+  <div class="task-item {% if task.is_overdue %}overdue{% endif %}" style="flex-direction:column;align-items:stretch;gap:.5rem">
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <div class="priority-dot priority-{{ task.priority }}"></div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+          <span class="task-title">{{ task.title }}</span>
+          <span class="badge badge-grey">{{ task.get_task_type_display }}</span>
+          <span class="badge {% if task.priority == 'urgent' %}badge-red{% elif task.priority == 'high' %}badge-amber{% else %}badge-grey{% endif %}">
+            {{ task.get_priority_display }}
+          </span>
+        </div>
+        {% if task.cow %}
+        <div class="task-cow" style="margin-top:.2rem">🐄 {{ task.cow.tag_number }}{% if task.cow.name %} — {{ task.cow.name }}{% endif %}</div>
+        {% endif %}
+        {% if task.description %}
+        <div style="font-size:.8rem;color:var(--text-muted);margin-top:.2rem">{{ task.description|truncatechars:80 }}</div>
+        {% endif %}
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="task-date">
+          {% if task.is_overdue %}
+            <span class="text-red font-bold">⚠ Overdue</span>
+          {% elif task.days_until_due == 0 %}
+            <span style="color:var(--amber-dark);font-weight:700">Today</span>
+          {% elif task.days_until_due == 1 %}
+            <span style="color:var(--amber-dark);font-weight:600">Tomorrow</span>
+          {% else %}
+            {{ task.due_date }}
+          {% endif %}
+        </div>
+        <div style="font-size:.72rem;color:var(--text-muted)">{{ task.due_date }}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.4rem;padding-top:.25rem;border-top:1px solid var(--border)">
+      {% if task.status == 'pending' or task.status == 'in_progress' %}
+      <form method="post" action="{% url 'task_complete' task.pk %}">{% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-primary">✓ Complete</button>
+      </form>
+      {% endif %}
+      <a href="{% url 'task_edit' task.pk %}" class="btn btn-sm btn-outline">✏️ Edit</a>
+      <button class="btn btn-sm btn-danger" onclick="confirmDelete('{% url 'task_delete' task.pk %}','{{ task.title|escapejs }}')">🗑</button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">✅</div>
+  <h3>No tasks found</h3>
+  <p>Schedule reminders for vaccinations, deworming, vet visits, and more.</p>
+  <a href="{% url 'task_add' %}" class="btn btn-primary">+ Schedule First Task</a>
+</div>
+{% endif %}
+{% endblock %}

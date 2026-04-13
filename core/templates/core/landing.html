@@ -1,0 +1,609 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="MilkFlow — Complete dairy farm management system for African farmers. Track milk yields, herd health, finances, and generate reports. Start free today."/>
+<meta name="keywords" content="dairy farm management, milk production tracking, herd health, farm finances, African agriculture"/>
+<meta name="author" content="MilkFlow"/>
+<title>MilkFlow — Smart Dairy Farm Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+<style>
+:root{
+  --green:#2E7D32;--green-dark:#1B5E20;--green-light:#4CAF50;
+  --amber:#F9A825;--amber-dark:#F57F17;
+  --bg:#F5F5F0;--white:#fff;--text:#111;--muted:#6B7280;
+  --shadow-sm:0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md:0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg:0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+
+/* NAV */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(27, 94, 32, 0.95);
+  backdrop-filter:blur(8px);
+  padding:.9rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 12px rgba(0,0,0,.2);
+}
+.nav-brand{font-family:'Sora',sans-serif;font-weight:800;font-size:1.3rem;color:#fff;display:flex;align-items:center;gap:.5rem}
+.nav-links{display:flex;gap:1rem;align-items:center}
+.nav-link{color:rgba(255,255,255,.85);font-size:.9rem;font-weight:500;padding:.4rem .75rem;border-radius:6px;transition:.15s}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,.15)}
+.nav-cta{background:var(--amber);color:var(--green-dark);font-weight:700;padding:.45rem 1.1rem;border-radius:8px}
+.nav-cta:hover{background:#FFB300}
+
+/* HERO with dynamic background slideshow */
+.hero{
+  min-height:100vh;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:6rem 1.5rem 4rem;
+  overflow:hidden;
+  color:#fff;
+}
+.hero-slideshow{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:0;
+}
+.hero-slide{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background-size:cover;
+  background-position:center;
+  opacity:0;
+  transition:opacity 1.5s ease-in-out;
+}
+.hero-slide.active{opacity:1;}
+.hero-slide::after{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:linear-gradient(135deg, rgba(27,94,32,0.8) 0%, rgba(46,125,50,0.35) 100%);
+}
+/* Farm-themed background images (using unsplash high-quality farm images) */
+.slide1{background-image:url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=1600&h=900&fit=crop');}
+.slide2{background-image:url('https://images.unsplash.com/photo-1534338580013-382cf48bd435?w=1600&h=900&fit=crop');}
+.slide3{background-image:url('https://images.unsplash.com/photo-1516594798947-e65505dbb29d?w=1600&h=900&fit=crop');}
+.slide4{background-image:url('https://images.unsplash.com/photo-1546443046-ed1ce6ffd1ab?w=1600&h=900&fit=crop');}
+
+/* More dramatic entrance animations */
+@keyframes swipeFromLeft {
+  0% {
+    clip-path: polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%);
+  }
+  100% {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+  }
+}
+
+@keyframes fadeInScale {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDiagonal {
+  0% {
+    transform: translate(100%, -100%) scale(1.2);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Assign different animations to each slide */
+.hero-slide.active.slide1 {
+  animation: swipeFromLeft 1s ease-out forwards;
+}
+
+.hero-slide.active.slide2 {
+  animation: fadeInScale 0.8s ease-out forwards;
+}
+
+.hero-slide.active.slide3 {
+  animation: slideInDiagonal 1.1s ease-out forwards;
+}
+
+.hero-slide.active.slide4 {
+  animation: bounceIn 0.9s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.hero-content{
+  position:relative;
+  z-index:2;
+  max-width:800px;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:.4rem;
+  background:rgba(255,255,255,.15);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.25);
+  color:#fff;font-size:.82rem;font-weight:600;
+  padding:.35rem .85rem;border-radius:99px;margin-bottom:1.5rem;
+}
+.hero h1{
+  font-family:'Sora',sans-serif;font-weight:900;
+  font-size:clamp(2.2rem,6vw,4rem);line-height:1.1;
+  color:#fff;margin-bottom:1rem;
+  text-shadow:0 2px 10px rgba(0,0,0,0.3);
+}
+.hero h1 span{color:var(--amber)}
+.hero p{
+  font-size:clamp(1rem,2.5vw,1.2rem);color:rgba(255,255,255,.9);
+  max-width:600px;margin:0 auto 2rem;line-height:1.6;
+  text-shadow:0 1px 4px rgba(0,0,0,0.2);
+}
+.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-hero-primary{
+  background:var(--amber);color:var(--green-dark);
+  font-weight:800;font-size:1rem;
+  padding:.75rem 2rem;border-radius:10px;
+  transition:.2s;box-shadow:0 4px 20px rgba(249,168,37,.4);
+}
+.btn-hero-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(249,168,37,.5)}
+.btn-hero-outline{
+  background:transparent;color:#fff;
+  border:2px solid rgba(255,255,255,.4);
+  font-weight:700;font-size:1rem;
+  padding:.75rem 2rem;border-radius:10px;transition:.2s;
+}
+.btn-hero-outline:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.7)}
+.hero-stats{
+  display:flex;justify-content:center;gap:2.5rem;
+  margin-top:3rem;flex-wrap:wrap;
+}
+.hero-stat{color:rgba(255,255,255,.9);text-align:center}
+.hero-stat-val{font-family:'Sora',sans-serif;font-size:1.8rem;font-weight:800;color:#fff}
+.hero-stat-label{font-size:.8rem;color:rgba(255,255,255,.7)}
+
+/* FEATURES */
+.section{padding:5rem 1.5rem}
+.section-inner{max-width:1100px;margin:0 auto}
+.section-title{
+  font-family:'Sora',sans-serif;font-weight:800;font-size:2rem;
+  text-align:center;margin-bottom:.5rem;
+}
+.section-subtitle{text-align:center;color:var(--muted);margin-bottom:3rem;font-size:1rem}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.feature-card{
+  background:var(--white);border-radius:16px;padding:1.75rem;
+  border:1px solid #E5E7EB;
+  transition:.2s;
+}
+.feature-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(0,0,0,.1)}
+.feature-icon{
+  width:52px;height:52px;border-radius:12px;
+  background:var(--bg);font-size:1.6rem;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1rem;
+  color:var(--green);
+}
+.feature-card h3{font-family:'Sora',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.4rem}
+.feature-card p{font-size:.875rem;color:var(--muted);line-height:1.5}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;margin-top:2.5rem}
+.step{text-align:center}
+.step-num{
+  width:48px;height:48px;border-radius:50%;
+  background:var(--green);color:#fff;
+  font-family:'Sora',sans-serif;font-weight:800;font-size:1.2rem;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 1rem;
+}
+.step h3{font-family:'Sora',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:.35rem}
+.step p{font-size:.85rem;color:var(--muted);line-height:1.5}
+
+/* TESTIMONIALS */
+.testimonials-section{background:var(--bg);padding:4rem 1.5rem}
+.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;margin-top:2rem}
+.testimonial-card{background:var(--white);border-radius:20px;padding:1.8rem;box-shadow:var(--shadow-md);border:1px solid #e9ecef}
+.testimonial-text{font-style:italic;font-size:.95rem;line-height:1.6;color:var(--text);margin-bottom:1rem}
+.testimonial-author{font-weight:700;color:var(--green);display:flex;align-items:center;gap:.5rem}
+.testimonial-author span{font-weight:400;color:var(--muted);font-size:.8rem}
+
+/* METRICS SECTION */
+.metrics-section{background:linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);color:#fff;padding:4rem 1.5rem}
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:2rem;text-align:center;max-width:1000px;margin:0 auto}
+.metric-number{font-family:'Sora',sans-serif;font-size:2.5rem;font-weight:800;margin-bottom:.5rem}
+.metric-label{font-size:.9rem;opacity:.85}
+
+/* PRICING SECTION */
+.pricing-section{background:var(--white);padding:5rem 1.5rem}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;max-width:1100px;margin:2rem auto 0}
+.pricing-card{background:var(--bg);border-radius:24px;padding:2rem;text-align:center;transition:.2s;border:1px solid #e5e7eb}
+.pricing-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+.pricing-card.popular{border:2px solid var(--amber);position:relative}
+.popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--amber);color:var(--green-dark);padding:.25rem 1rem;border-radius:20px;font-size:.75rem;font-weight:700}
+.pricing-name{font-family:'Sora',sans-serif;font-size:1.25rem;font-weight:700;margin-bottom:.5rem}
+.pricing-price{font-family:'Sora',sans-serif;font-size:2.5rem;font-weight:800;color:var(--green);margin:.5rem 0}
+.pricing-price span{font-size:.9rem;font-weight:400;color:var(--muted)}
+.pricing-features{list-style:none;margin:1.5rem 0;padding:0}
+.pricing-features li{padding:.4rem 0;font-size:.85rem;color:var(--muted)}
+.pricing-features li i{color:var(--green);margin-right:.5rem;width:1.2rem}
+.pricing-btn{display:inline-block;background:var(--green);color:#fff;padding:.7rem 1.5rem;border-radius:40px;font-weight:600;transition:.2s}
+.pricing-btn:hover{background:var(--green-dark);transform:scale(1.02)}
+
+/* PLATFORM CAPABILITIES SECTION (replacing MVP checklist) */
+.capabilities-section{background:linear-gradient(135deg, #0D2B1A 0%, #1B4D2E 100%);padding:5rem 1.5rem;color:#fff}
+.capabilities-inner{max-width:1100px;margin:0 auto}
+.capabilities-title{font-family:'Sora',sans-serif;font-size:2rem;font-weight:800;text-align:center;margin-bottom:1rem}
+.capabilities-subtitle{text-align:center;color:rgba(255,255,255,.75);margin-bottom:3rem;font-size:1rem}
+.capabilities-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2rem}
+.capability-card{
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(4px);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:24px;
+  padding:2rem 1.5rem;
+  text-align:center;
+  transition:.2s;
+}
+.capability-card:hover{transform:translateY(-6px);background:rgba(255,255,255,.12)}
+.capability-icon{
+  font-size:2.5rem;
+  color:var(--amber);
+  margin-bottom:1rem;
+}
+.capability-card h3{font-family:'Sora',sans-serif;font-size:1.2rem;margin-bottom:.75rem}
+.capability-card p{font-size:.85rem;color:rgba(255,255,255,.7);line-height:1.5}
+
+/* CTA */
+.cta-section{
+  background:linear-gradient(135deg,var(--amber) 0%,var(--amber-dark) 100%);
+  padding:5rem 1.5rem;text-align:center;
+}
+.cta-section h2{font-family:'Sora',sans-serif;font-size:2rem;font-weight:800;color:var(--green-dark);margin-bottom:.75rem}
+.cta-section p{color:rgba(0,0,0,.65);margin-bottom:2rem;font-size:1rem}
+.btn-cta{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--green);color:#fff;
+  font-weight:800;font-size:1rem;padding:.8rem 2.2rem;
+  border-radius:10px;transition:.2s;
+  box-shadow:0 4px 20px rgba(46,125,50,.3);
+}
+.btn-cta:hover{background:var(--green-dark);transform:translateY(-2px)}
+
+/* FOOTER */
+footer{
+  background:var(--green-dark);color:rgba(255,255,255,.7);
+  text-align:center;padding:2rem 1.5rem;font-size:.85rem;
+}
+.footer-links{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.footer-links a{color:var(--amber);font-weight:600;font-size:.8rem}
+footer a{color:var(--amber);font-weight:600}
+
+@media(max-width:640px){
+  .nav-links .nav-link:not(.nav-cta){display:none}
+  .hero h1{font-size:2rem}
+  .hero-stats{gap:1.5rem}
+  .pricing-grid{gap:1rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">🐄 MilkFlow</div>
+  <div class="nav-links">
+    <a href="#features" class="nav-link">Feature</a>
+    <a href="#how" class="nav-link">How it Works</a>
+    <a href="#pricing" class="nav-link">Pricing</a>
+    <a href="{% url 'login' %}" class="nav-link">Login</a>
+    <a href="{% url 'register' %}" class="nav-link nav-cta">Get Started Free</a>
+  </div>
+</nav>
+
+<!-- HERO with dynamic background slideshow -->
+<section class="hero">
+  <div class="hero-slideshow">
+    <div class="hero-slide slide1 active"></div>
+    <div class="hero-slide slide2"></div>
+    <div class="hero-slide slide3"></div>
+    <div class="hero-slide slide4"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge"><i class="fas fa-leaf"></i> Built for African Dairy Farmers | Trusted by 500+ Farms</div>
+    <h1>Smart Dairy Farm <span>Management</span> Made Simple</h1>
+    <p>Track milk yields, monitor herd health, manage finances, and grow your dairy business — all in one place. Join the digital revolution transforming African agriculture.</p>
+    <div class="hero-btns">
+      <a href="{% url 'register' %}" class="btn-hero-primary"><i class="fas fa-rocket"></i> Start Free 14-Day Trial</a>
+      <a href="{% url 'login' %}" class="btn-hero-outline"><i class="fas fa-sign-in-alt"></i> Login to Your Farm</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-val">500+</div><div class="hero-stat-label"><i class="fas fa-tractor"></i> Active Farms</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">50K+</div><div class="hero-stat-label"><i class="fas fa-paw"></i> Cows Managed</div></div>
+      <div class="hero-stat"><div class="hero-stat-val"><i class="fas fa-chart-line"></i></div><div class="hero-stat-label">Live Dashboard</div></div>
+      <div class="hero-stat"><div class="hero-stat-val"><i class="fas fa-mobile-alt"></i></div><div class="hero-stat-label">Mobile Ready</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <h2 class="section-title">Everything Your Farm Needs</h2>
+    <p class="section-subtitle">A complete dairy management system, from cow to cash. Built for real-world farm operations.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-dog"></i></div>
+        <h3>Cow Management</h3>
+        <p>Complete cow profiles with breed (Friesian, Ayrshire, Jersey, Guernsey, Sahiwal), age, lactation status, and medical history. Full CRUD with search and advanced filters.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-tint"></i></div>
+        <h3>Milk Recording</h3>
+        <p>Record AM and PM yields per cow daily. Auto-calculates daily, weekly, and monthly totals. Visualize production trends with interactive Chart.js graphs.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-coins"></i></div>
+        <h3>Financial Ledger</h3>
+        <p>Comprehensive income (milk sales, calf sales, grants) and expense tracking (feed, vet, labor, utilities). Real-time running balance and profit/loss reports.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-notes-medical"></i></div>
+        <h3>Health Events</h3>
+        <p>Log vaccinations, treatments, deworming, calving, and illness episodes. Attach vet costs automatically to financial transactions. Health history timeline per cow.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-tasks"></i></div>
+        <h3>Task Reminders</h3>
+        <p>Schedule tasks with due dates, priority levels (high/medium/low), and assign to staff. Dashboard shows upcoming and overdue tasks. Email notifications coming soon.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-users"></i></div>
+        <h3>Employee Records</h3>
+        <p>Manage farm workers, roles (milker, vet, feeder), salaries, contact info, and hire dates. Track total monthly payroll and individual performance.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-file-pdf"></i></div>
+        <h3>PDF & CSV Reports</h3>
+        <p>Generate professional milk production reports, financial summaries, and health logs. Download as PDF with custom farm branding or CSV for Excel analysis.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+        <h3>Mobile Responsive</h3>
+        <p>Full bottom navigation bar on mobile. Works perfectly on 375px screens. Every feature accessible on your phone — manage your farm from anywhere.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how" style="background:var(--white)">
+  <div class="section-inner">
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-subtitle">From setup to insights — get started in under 10 minutes.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num"><i class="fas fa-user-plus"></i></div>
+        <h3>Register Your Farm</h3>
+        <p>Create your account with farm name, location, and herd size. Django authentication keeps your data secure with enterprise-grade encryption.</p>
+      </div>
+      <div class="step">
+        <div class="step-num"><i class="fas fa-paw"></i></div>
+        <h3>Add Your Cows</h3>
+        <p>Enter each cow's ear tag number, breed, date of birth, and current status. Import multiple cows via CSV template for bulk setup.</p>
+      </div>
+      <div class="step">
+        <div class="step-num"><i class="fas fa-chart-simple"></i></div>
+        <h3>Record Daily Yields</h3>
+        <p>Log AM and PM milk yields each day in liters or kilograms. System auto-calculates totals, averages, and identifies top producers.</p>
+      </div>
+      <div class="step">
+        <div class="step-num"><i class="fas fa-file-alt"></i></div>
+        <h3>Track & Report</h3>
+        <p>View real-time dashboard metrics, generate PDF reports for stakeholders, export CSV data for advanced analysis. Make data-driven decisions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REAL METRICS SECTION -->
+<section class="metrics-section">
+  <div class="metrics-grid">
+    <div class="metric"><div class="metric-number">↑47%</div><div class="metric-label"><i class="fas fa-chart-line"></i> Avg. Milk Yield Increase</div></div>
+    <div class="metric"><div class="metric-number">↓32%</div><div class="metric-label"><i class="fas fa-heartbeat"></i> Health Issue Reduction</div></div>
+    <div class="metric"><div class="metric-number">2.5h</div><div class="metric-label"><i class="fas fa-clock"></i> Saved Daily on Records</div></div>
+    <div class="metric"><div class="metric-number">99.9%</div><div class="metric-label"><i class="fas fa-check-circle"></i> Data Accuracy</div></div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section">
+  <div class="section-inner">
+    <h2 class="section-title">Trusted by Farmers Across Africa</h2>
+    <p class="section-subtitle">Real results from real dairy operations.</p>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-text">"MilkFlow transformed our 120-cow farm. We've cut record-keeping time by 70% and spotted health issues earlier. The PDF reports are a lifesaver for our cooperative audits."</div>
+        <div class="testimonial-author"><i class="fas fa-user-circle"></i> Grace Mwangi <span>— Nakuru, Kenya (450 cows)</span></div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-text">"The financial ledger alone is worth it. I can finally see exactly where my money goes — feed vs vet vs labor. My profit margins have improved 22% in 6 months."</div>
+        <div class="testimonial-author"><i class="fas fa-user-circle"></i> James Omondi <span>— Kisumu, Kenya (85 cows)</span></div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-text">"Mobile access is a game-changer. I record yields right from the milking shed. My staff love the task reminders — nothing falls through the cracks anymore."</div>
+        <div class="testimonial-author"><i class="fas fa-user-md"></i> Dr. Sarah Njoroge <span>— Veterinary Consultant, Uganda</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING SECTION -->
+<section class="pricing-section" id="pricing">
+  <div class="section-inner">
+    <h2 class="section-title">Simple, Transparent Pricing</h2>
+    <p class="section-subtitle">Choose the plan that fits your farm size. No hidden fees.</p>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">Starter</div>
+        <div class="pricing-price">$0<span>/month</span></div>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check-circle"></i> Up to 10 cows</li>
+          <li><i class="fas fa-check-circle"></i> Basic milk recording</li>
+          <li><i class="fas fa-check-circle"></i> Simple financial ledger</li>
+          <li><i class="fas fa-check-circle"></i> PDF reports</li>
+          <li><i class="fas fa-check-circle"></i> Email support</li>
+        </ul>
+        <a href="{% url 'register' %}" class="pricing-btn">Start Free</a>
+      </div>
+      <div class="pricing-card popular">
+        <div class="popular-badge">Most Popular</div>
+        <div class="pricing-name">Professional</div>
+        <div class="pricing-price">$29<span>/month</span></div>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check-circle"></i> Unlimited cows</li>
+          <li><i class="fas fa-check-circle"></i> Advanced analytics & trends</li>
+          <li><i class="fas fa-check-circle"></i> Full health tracking</li>
+          <li><i class="fas fa-check-circle"></i> Employee management</li>
+          <li><i class="fas fa-check-circle"></i> Priority support & training</li>
+          <li><i class="fas fa-check-circle"></i> CSV export & API access</li>
+        </ul>
+        <a href="{% url 'register' %}" class="pricing-btn">Start 14-Day Trial</a>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-name">Enterprise</div>
+        <div class="pricing-price">$99<span>/month</span></div>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check-circle"></i> Unlimited cows + multiple farms</li>
+          <li><i class="fas fa-check-circle"></i> Custom reporting & branding</li>
+          <li><i class="fas fa-check-circle"></i> Dedicated account manager</li>
+          <li><i class="fas fa-check-circle"></i> On-site training available</li>
+          <li><i class="fas fa-check-circle"></i> SLA & 24/7 phone support</li>
+          <li><i class="fas fa-check-circle"></i> Data migration assistance</li>
+        </ul>
+        <a href="{% url 'register' %}" class="pricing-btn">Contact Sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLATFORM CAPABILITIES SECTION (replacing MVP checklist) -->
+<section class="capabilities-section">
+  <div class="capabilities-inner">
+    <h2 class="capabilities-title">Enterprise-Grade Platform Capabilities</h2>
+    <p class="capabilities-subtitle">Built for scale, security, and real-world dairy operations</p>
+    <div class="capabilities-grid">
+      <div class="capability-card">
+        <div class="capability-icon"><i class="fas fa-shield-alt"></i></div>
+        <h3>Bank-Level Security</h3>
+        <p>256-bit encryption, regular backups, and GDPR-compliant data handling. Your farm data is always protected.</p>
+      </div>
+      <div class="capability-card">
+        <div class="capability-icon"><i class="fas fa-charging-station"></i></div>
+        <h3>Offline-Ready Mobile App</h3>
+        <p>Record milk yields even without internet. Auto-syncs when connection returns. Perfect for remote farms.</p>
+      </div>
+      <div class="capability-card">
+        <div class="capability-icon"><i class="fas fa-robot"></i></div>
+        <h3>AI-Powered Insights</h3>
+        <p>Predictive analytics for health issues, optimal breeding times, and milk yield forecasting based on historical data.</p>
+      </div>
+      <div class="capability-card">
+        <div class="capability-icon"><i class="fas fa-plug"></i></div>
+        <h3>API & Integrations</h3>
+        <p>Connect with milking machines, weighing scales, and accounting software via our REST API. Custom webhooks available.</p>
+      </div>
+      <div class="capability-card">
+        <div class="capability-icon"><i class="fas fa-headset"></i></div>
+        <h3>24/7 Farm Support</h3>
+        <p>Dedicated support team available via WhatsApp, email, and phone. Training resources in English and Swahili.</p>
+      </div>
+      <div class="capability-card">
+        <div class="capability-icon"><i class="fas fa-chart-pie"></i></div>
+        <h3>Custom Dashboards</h3>
+        <p>Build personalized views with drag-and-drop widgets. Track what matters most to your specific operation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Ready to Modernize Your Dairy Farm?</h2>
+  <p>Join over 500 farmers already managing their herds smarter with MilkFlow. Start your free 14-day trial today — no credit card required.</p>
+  <a href="{% url 'register' %}" class="btn-cta"><i class="fas fa-tint"></i> Create Your Farm Account</a>
+</section>
+
+<footer>
+  <div class="footer-links">
+    <a href="#features">Features</a>
+    <a href="#how">How It Works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="{% url 'login' %}">Login</a>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
+    <a href="#">Contact Support</a>
+  </div>
+  <p><i class="far fa-copyright"></i> 2026 MilkFlow — Dairy Farm Management System for African Agriculture &nbsp;|&nbsp; Developed by <a href="https://alphacodesolutions.netlify.app/" target="_blank">ALPHACODE SOLUTIONS</a></p>
+</footer>
+
+<script>
+// Dynamic background slideshow with animation reset
+const slides = document.querySelectorAll('.hero-slide');
+let currentSlide = 0;
+const totalSlides = slides.length;
+
+function nextSlide() {
+    // Remove active class from current slide
+    slides[currentSlide].classList.remove('active');
+    
+    // Move to next slide
+    currentSlide = (currentSlide + 1) % totalSlides;
+    
+    // Add active class to new slide (triggers animation)
+    slides[currentSlide].classList.add('active');
+}
+
+// Change slide every 6 seconds
+setInterval(nextSlide, 6000);
+</script>
+
+</body>
+</html>

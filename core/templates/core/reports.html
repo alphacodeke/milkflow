@@ -1,0 +1,98 @@
+{% extends 'core/base.html' %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">📄 Reports & Exports</h1>
+    <p class="page-subtitle">Generate PDF reports and CSV exports for your records</p>
+  </div>
+</div>
+
+<!-- MILK REPORTS -->
+<div class="card" style="margin-bottom:1rem">
+  <div class="card-title">🥛 Milk Production Reports</div>
+  <form method="get" action="{% url 'report_milk_pdf' %}" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:.75rem">
+    <div class="filter-group" style="min-width:150px">
+      <div class="filter-label">From Date</div>
+      <input name="date_from" type="date" class="form-control" value="{{ today|date:'Y-m-d'|default:'' }}"/>
+    </div>
+    <div class="filter-group" style="min-width:150px">
+      <div class="filter-label">To Date</div>
+      <input name="date_to" type="date" class="form-control" value="{{ today|date:'Y-m-d'|default:'' }}"/>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <button type="submit" class="btn btn-primary">📥 Download PDF</button>
+    </div>
+  </form>
+  <form method="get" action="{% url 'report_milk_csv' %}" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end">
+    <div class="filter-group" style="min-width:150px">
+      <div class="filter-label">From Date</div>
+      <input name="date_from" type="date" class="form-control"/>
+    </div>
+    <div class="filter-group" style="min-width:150px">
+      <div class="filter-label">To Date</div>
+      <input name="date_to" type="date" class="form-control"/>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <button type="submit" class="btn btn-outline">📊 Export CSV</button>
+    </div>
+  </form>
+  <p class="form-hint" style="margin-top:.5rem">Leave dates blank to export all records</p>
+</div>
+
+<!-- FINANCE REPORTS -->
+<div class="card" style="margin-bottom:1rem">
+  <div class="card-title">💰 Financial Reports</div>
+  <form method="get" action="{% url 'report_finance_pdf' %}" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:.75rem">
+    <div class="filter-group" style="min-width:150px">
+      <div class="filter-label">From Date</div>
+      <input name="date_from" type="date" class="form-control"/>
+    </div>
+    <div class="filter-group" style="min-width:150px">
+      <div class="filter-label">To Date</div>
+      <input name="date_to" type="date" class="form-control"/>
+    </div>
+    <button type="submit" class="btn btn-primary">📥 Download PDF</button>
+  </form>
+  <form method="get" action="{% url 'report_finance_csv' %}" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end">
+    <div class="filter-group" style="min-width:150px">
+      <div class="filter-label">From Date</div>
+      <input name="date_from" type="date" class="form-control"/>
+    </div>
+    <div class="filter-group" style="min-width:150px">
+      <div class="filter-label">To Date</div>
+      <input name="date_to" type="date" class="form-control"/>
+    </div>
+    <button type="submit" class="btn btn-outline">📊 Export CSV</button>
+  </form>
+</div>
+
+<!-- HEALTH REPORTS -->
+<div class="card" style="margin-bottom:1rem">
+  <div class="card-title">💊 Health Events Report</div>
+  <form method="get" action="{% url 'report_health_pdf' %}" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end">
+    <div class="filter-group" style="min-width:150px">
+      <div class="filter-label">From Date</div>
+      <input name="date_from" type="date" class="form-control"/>
+    </div>
+    <div class="filter-group" style="min-width:150px">
+      <div class="filter-label">To Date</div>
+      <input name="date_to" type="date" class="form-control"/>
+    </div>
+    <button type="submit" class="btn btn-primary">📥 Download PDF</button>
+  </form>
+</div>
+
+<!-- QUICK REPORTS (last 30 days) -->
+<div class="card">
+  <div class="card-title">⚡ Quick Reports (Last 30 Days)</div>
+  <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+    <a href="{% url 'report_milk_pdf' %}" class="btn btn-outline">🥛 Milk PDF</a>
+    <a href="{% url 'report_milk_csv' %}" class="btn btn-outline">🥛 Milk CSV</a>
+    <a href="{% url 'report_finance_pdf' %}" class="btn btn-outline">💰 Finance PDF</a>
+    <a href="{% url 'report_finance_csv' %}" class="btn btn-outline">💰 Finance CSV</a>
+    <a href="{% url 'report_health_pdf' %}" class="btn btn-outline">💊 Health PDF</a>
+  </div>
+  <p class="form-hint" style="margin-top:.75rem">Quick reports use last 30 days by default. Use the forms above to specify custom date ranges.</p>
+</div>
+{% endblock %}

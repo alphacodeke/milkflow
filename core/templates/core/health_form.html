@@ -1,0 +1,90 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="page-title">💊 {{ title }}</h1></div>
+  <a href="{% url 'health_list' %}" class="btn btn-ghost">← Back</a>
+</div>
+<div style="max-width:640px">
+  <div class="card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cow (Optional)</label>
+          <select name="cow" class="form-control form-select">
+            <option value="">— Entire Herd —</option>
+            {% for cow in form.fields.cow.queryset %}
+            <option value="{{ cow.pk }}" {% if form.cow.value|stringformat:"s" == cow.pk|stringformat:"s" %}selected{% endif %}>
+              {{ cow.tag_number }}{% if cow.name %} — {{ cow.name }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Event Date *</label>
+          <input name="event_date" type="date" class="form-control"
+                 value="{{ form.event_date.value|default:'' }}" required/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Event Type *</label>
+          <select name="event_type" class="form-control form-select" required>
+            <option value="">Select type...</option>
+            {% for val,label in form.fields.event_type.choices %}
+            {% if val %}
+            <option value="{{ val }}" {% if form.event_type.value == val %}selected{% endif %}>{{ label }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+          {% if form.event_type.errors %}<div class="field-errors">{{ form.event_type.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control form-select">
+            {% for val,label in form.fields.status.choices %}
+            <option value="{{ val }}" {% if form.status.value == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description *</label>
+        <textarea name="description" class="form-control {% if form.description.errors %}is-invalid{% endif %}"
+                  rows="3" placeholder="Describe the health event...">{{ form.description.value|default:'' }}</textarea>
+        {% if form.description.errors %}<div class="field-errors">{{ form.description.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="form-group">
+        <label class="form-label">Treatment Given</label>
+        <textarea name="treatment" class="form-control" rows="2"
+                  placeholder="Medicines, procedures, dosage...">{{ form.treatment.value|default:'' }}</textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Veterinarian Name</label>
+          <input name="vet_name" type="text" class="form-control"
+                 value="{{ form.vet_name.value|default:'' }}" placeholder="Dr. Jane Wanjiku"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cost (KES)</label>
+          <input name="cost" type="number" step="0.01" min="0" class="form-control"
+                 value="{{ form.cost.value|default:'0' }}" placeholder="0.00"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Follow-Up Date</label>
+        <input name="follow_up_date" type="date" class="form-control"
+               value="{{ form.follow_up_date.value|default:'' }}"/>
+      </div>
+      {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors.0 }}</div>
+      {% endif %}
+      <div style="display:flex;gap:.75rem">
+        <button type="submit" class="btn btn-primary">💾 Save Event</button>
+        <a href="{% url 'health_list' %}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

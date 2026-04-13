@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+{% block title %}Employees{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">👥 Employees</h1>
+    <p class="page-subtitle">Monthly payroll: <strong>KES {{ total_salary|floatformat:2 }}</strong></p>
+  </div>
+  <a href="{% url 'employee_add' %}" class="btn btn-primary">+ Add Employee</a>
+</div>
+
+{% if employees %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Role</th><th>Phone</th><th>Hire Date</th><th>Salary (KES/mo)</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+    {% for emp in employees %}
+    <tr>
+      <td><strong>{{ emp.full_name }}</strong></td>
+      <td>{{ emp.get_role_display }}</td>
+      <td>{{ emp.phone|default:"—" }}</td>
+      <td>{{ emp.hire_date|default:"—" }}</td>
+      <td>{{ emp.monthly_salary|floatformat:2 }}</td>
+      <td>
+        <span class="badge {% if emp.status == 'active' %}badge-green{% elif emp.status == 'on_leave' %}badge-amber{% else %}badge-grey{% endif %}">
+          {{ emp.get_status_display }}
+        </span>
+      </td>
+      <td>
+        <div style="display:flex;gap:.3rem">
+          <a href="{% url 'employee_edit' emp.pk %}" class="btn btn-sm btn-outline">✏️</a>
+          <button class="btn btn-sm btn-danger" onclick="confirmDelete('{% url 'employee_delete' emp.pk %}','{{ emp.full_name|escapejs }}')">🗑</button>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">👥</div>
+  <h3>No employees yet</h3>
+  <p>Add farm workers, milkers, and other staff.</p>
+  <a href="{% url 'employee_add' %}" class="btn btn-primary">+ Add First Employee</a>
+</div>
+{% endif %}
+{% endblock %}

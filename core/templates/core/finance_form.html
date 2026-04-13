@@ -1,0 +1,94 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="page-title">💰 {{ title }}</h1></div>
+  <a href="{% url 'finance_list' %}" class="btn btn-ghost">← Back</a>
+</div>
+
+<div style="max-width:540px">
+  <div class="card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Transaction Date *</label>
+        <input name="transaction_date" type="date" class="form-control"
+               value="{{ form.transaction_date.value|default:'' }}" required/>
+        {% if form.transaction_date.errors %}<div class="field-errors">{{ form.transaction_date.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Transaction Type *</label>
+          <select name="transaction_type" id="txn_type" class="form-control form-select"
+                  onchange="updateCategories()" required>
+            <option value="">Select type...</option>
+            <option value="income" {% if form.transaction_type.value == 'income' %}selected{% endif %}>📈 Income</option>
+            <option value="expense" {% if form.transaction_type.value == 'expense' %}selected{% endif %}>📉 Expense</option>
+          </select>
+          {% if form.transaction_type.errors %}<div class="field-errors">{{ form.transaction_type.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select name="category" id="category_select" class="form-control form-select" required>
+            <option value="">Select category...</option>
+          </select>
+          {% if form.category.errors %}<div class="field-errors">{{ form.category.errors.0 }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Amount (KES) *</label>
+        <input name="amount" type="number" step="0.01" min="0.01" class="form-control {% if form.amount.errors %}is-invalid{% endif %}"
+               value="{{ form.amount.value|default:'' }}" placeholder="0.00" required/>
+        {% if form.amount.errors %}<div class="field-errors">{{ form.amount.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input name="description" type="text" class="form-control"
+               value="{{ form.description.value|default:'' }}" placeholder="Brief description"/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Reference / Receipt No.</label>
+        <input name="reference" type="text" class="form-control"
+               value="{{ form.reference.value|default:'' }}" placeholder="INV-001 or receipt number"/>
+      </div>
+
+      {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors.0 }}</div>
+      {% endif %}
+
+      <div style="display:flex;gap:.75rem">
+        <button type="submit" class="btn btn-primary">💾 Save Transaction</button>
+        <a href="{% url 'finance_list' %}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const INCOME_CATS = {{ income_cats|safe }};
+const EXPENSE_CATS = {{ expense_cats|safe }};
+const currentCategory = "{{ form.category.value|default:'' }}";
+
+function updateCategories() {
+  const type = document.getElementById('txn_type').value;
+  const sel = document.getElementById('category_select');
+  sel.innerHTML = '<option value="">Select category...</option>';
+  const cats = type === 'income' ? INCOME_CATS : (type === 'expense' ? EXPENSE_CATS : {});
+  for (const [val, label] of Object.entries(cats)) {
+    const opt = document.createElement('option');
+    opt.value = val; opt.textContent = label;
+    if (val === currentCategory) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+// Init on load
+updateCategories();
+</script>
+{% endblock %}

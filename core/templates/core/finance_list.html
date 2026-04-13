@@ -1,0 +1,113 @@
+{% extends 'core/base.html' %}
+{% block title %}Financial Ledger{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">💰 Financial Ledger</h1>
+    <p class="page-subtitle">Running balance: <strong style="color:{% if balance >= 0 %}var(--green){% else %}var(--red){% endif %}">KES {{ balance|floatformat:2 }}</strong></p>
+  </div>
+  <a href="{% url 'finance_add' %}" class="btn btn-primary">+ Add Transaction</a>
+</div>
+
+<!-- SUMMARY CARDS -->
+<div class="metrics-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1rem">
+  <div class="metric-card green">
+    <div class="metric-icon">📈</div>
+    <div class="metric-value" style="font-size:1.3rem">KES {{ total_income|floatformat:2 }}</div>
+    <div class="metric-label">Total Income</div>
+  </div>
+  <div class="metric-card red">
+    <div class="metric-icon">📉</div>
+    <div class="metric-value" style="font-size:1.3rem">KES {{ total_expense|floatformat:2 }}</div>
+    <div class="metric-label">Total Expenses</div>
+  </div>
+  <div class="metric-card {% if balance >= 0 %}green{% else %}red{% endif %}">
+    <div class="metric-icon">⚖️</div>
+    <div class="metric-value" style="font-size:1.3rem">KES {{ balance|floatformat:2 }}</div>
+    <div class="metric-label">Net Balance</div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="get" style="display:flex;gap:.75rem;flex-wrap:wrap;width:100%;align-items:flex-end">
+    <div class="filter-group">
+      <div class="filter-label">From</div>
+      <input name="date_from" type="date" class="form-control" value="{{ date_from }}"/>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">To</div>
+      <input name="date_to" type="date" class="form-control" value="{{ date_to }}"/>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Type</div>
+      <select name="type" class="form-control form-select">
+        <option value="">All Types</option>
+        <option value="income" {% if type_filter == 'income' %}selected{% endif %}>Income</option>
+        <option value="expense" {% if type_filter == 'expense' %}selected{% endif %}>Expense</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Category</div>
+      <select name="category" class="form-control form-select">
+        <option value="">All Categories</option>
+        <optgroup label="Income">
+          {% for val,label in income_categories %}
+          <option value="{{ val }}" {% if category_filter == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </optgroup>
+        <optgroup label="Expenses">
+          {% for val,label in expense_categories %}
+          <option value="{{ val }}" {% if category_filter == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </optgroup>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Filter</button>
+    <a href="{% url 'finance_list' %}" class="btn btn-ghost">Clear</a>
+  </form>
+</div>
+
+{% if transactions %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount (KES)</th><th>Balance (KES)</th><th>Ref</th><th></th></tr>
+    </thead>
+    <tbody>
+    {% for txn in transactions %}
+    <tr>
+      <td>{{ txn.transaction_date }}</td>
+      <td>
+        <span class="badge {% if txn.transaction_type == 'income' %}badge-green{% else %}badge-red{% endif %}">
+          {{ txn.get_transaction_type_display }}
+        </span>
+      </td>
+      <td>{{ txn.get_category_display_name }}</td>
+      <td class="truncate">{{ txn.description|default:"—" }}</td>
+      <td class="amount-{{ txn.transaction_type }}">
+        {% if txn.transaction_type == 'income' %}+{% else %}-{% endif %}{{ txn.amount|floatformat:2 }}
+      </td>
+      <td style="font-weight:600;color:{% if running_balance_map|default:'' %}{% endif %}var(--text)">
+        {% with bal=running_balance_map|default:'' %}
+        {{ running_balance_map|default:'' }}
+        {% endwith %}
+        —
+      </td>
+      <td class="text-muted" style="font-size:.8rem">{{ txn.reference|default:"" }}</td>
+      <td>
+        <button class="btn btn-sm btn-danger" onclick="confirmDelete('{% url 'finance_delete' txn.pk %}','{{ txn.transaction_date }} transaction')">🗑</button>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">💰</div>
+  <h3>No transactions found</h3>
+  <p>Start recording your income and expenses.</p>
+  <a href="{% url 'finance_add' %}" class="btn btn-primary">+ Add First Transaction</a>
+</div>
+{% endif %}
+{% endblock %}

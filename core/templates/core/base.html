@@ -1,0 +1,505 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>{% block title %}MilkFlow{% endblock %} | Dairy Farm Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --green: #2E7D32;
+  --green-dark: #1B5E20;
+  --green-light: #4CAF50;
+  --green-bg: #E8F5E9;
+  --amber: #F9A825;
+  --amber-dark: #F57F17;
+  --amber-light: #FFF8E1;
+  --bg: #F5F5F0;
+  --white: #FFFFFF;
+  --card: #FFFFFF;
+  --text: #1A1A1A;
+  --text-muted: #6B7280;
+  --border: #E5E7EB;
+  --red: #EF4444;
+  --red-bg: #FEF2F2;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,0.10);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --nav-h: 64px;
+  --bottom-nav-h: 64px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:var(--bottom-nav-h)}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font-family:inherit;font-size:inherit}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+/* ── TOP NAVBAR ── */
+.navbar{
+  position:sticky;top:0;z-index:100;
+  background:var(--green);
+  height:var(--nav-h);
+  display:flex;align-items:center;
+  padding:0 1rem;
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+.navbar-brand{
+  display:flex;align-items:center;gap:.5rem;
+  font-family:'Sora',sans-serif;font-weight:800;font-size:1.2rem;color:#fff;
+}
+.navbar-brand .logo-icon{font-size:1.5rem}
+.navbar-spacer{flex:1}
+.navbar-actions{display:flex;align-items:center;gap:.5rem}
+.nav-btn{
+  background:rgba(255,255,255,.12);border:none;
+  color:#fff;cursor:pointer;
+  padding:.4rem .75rem;border-radius:6px;
+  font-size:.85rem;font-weight:500;
+  transition:background .15s;
+}
+.nav-btn:hover{background:rgba(255,255,255,.22)}
+.nav-user{display:flex;align-items:center;gap:.5rem;color:#fff;font-size:.85rem}
+.nav-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--amber);color:var(--green-dark);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.85rem;
+}
+
+/* ── DESKTOP SIDEBAR ── */
+.layout{display:flex;min-height:calc(100vh - var(--nav-h))}
+.sidebar{
+  width:220px;flex-shrink:0;
+  background:var(--white);
+  border-right:1px solid var(--border);
+  padding:1rem 0;
+  position:sticky;top:var(--nav-h);
+  height:calc(100vh - var(--nav-h));
+  overflow-y:auto;
+}
+.sidebar-link{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.65rem 1.25rem;
+  font-size:.9rem;font-weight:500;
+  color:var(--text-muted);
+  border-left:3px solid transparent;
+  transition:all .15s;
+}
+.sidebar-link:hover{color:var(--green);background:var(--green-bg)}
+.sidebar-link.active{
+  color:var(--green);background:var(--green-bg);
+  border-left-color:var(--green);font-weight:600;
+}
+.sidebar-icon{font-size:1.1rem;width:20px;text-align:center}
+.sidebar-section{
+  font-size:.7rem;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--text-muted);
+  padding:.75rem 1.25rem .3rem;
+}
+.main{flex:1;padding:1.5rem;max-width:1100px;overflow-x:hidden}
+
+/* ── BOTTOM NAV (mobile) ── */
+.bottom-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:var(--white);
+  border-top:1px solid var(--border);
+  height:var(--bottom-nav-h);
+  padding:0 .25rem;
+  box-shadow:0 -2px 12px rgba(0,0,0,.08);
+}
+.bottom-nav-items{display:flex;align-items:center;justify-content:space-around;height:100%}
+.bottom-nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:.35rem .5rem;border-radius:8px;
+  font-size:.65rem;font-weight:500;color:var(--text-muted);
+  flex:1;cursor:pointer;transition:all .15s;
+}
+.bottom-nav-item.active,.bottom-nav-item:hover{color:var(--green)}
+.bottom-nav-item .nav-icon{font-size:1.3rem}
+
+/* ── CARDS ── */
+.card{
+  background:var(--card);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:1.25rem;
+  border:1px solid var(--border);
+}
+.card-title{
+  font-family:'Sora',sans-serif;font-weight:700;
+  font-size:1rem;margin-bottom:1rem;color:var(--text);
+  display:flex;align-items:center;gap:.5rem;
+}
+
+/* ── METRIC CARDS ── */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem}
+.metric-card{
+  background:var(--card);border-radius:var(--radius);
+  padding:1.1rem 1.25rem;
+  border:1px solid var(--border);box-shadow:var(--shadow);
+  position:relative;overflow:hidden;
+}
+.metric-card::before{
+  content:'';position:absolute;top:0;left:0;
+  width:4px;height:100%;
+}
+.metric-card.green::before{background:var(--green)}
+.metric-card.amber::before{background:var(--amber)}
+.metric-card.red::before{background:var(--red)}
+.metric-card.blue::before{background:#3B82F6}
+.metric-icon{font-size:1.8rem;margin-bottom:.4rem}
+.metric-value{
+  font-family:'Sora',sans-serif;font-weight:800;font-size:1.7rem;
+  color:var(--text);line-height:1;
+}
+.metric-label{font-size:.75rem;color:var(--text-muted);margin-top:.25rem;font-weight:500}
+.metric-sub{font-size:.7rem;color:var(--text-muted);margin-top:.25rem}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.55rem 1.1rem;border-radius:var(--radius-sm);
+  font-size:.88rem;font-weight:600;cursor:pointer;
+  border:2px solid transparent;transition:all .15s;
+  white-space:nowrap;
+}
+.btn-primary{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-primary:hover{background:var(--green-dark);border-color:var(--green-dark)}
+.btn-amber{background:var(--amber);color:var(--green-dark);border-color:var(--amber)}
+.btn-amber:hover{background:var(--amber-dark);border-color:var(--amber-dark)}
+.btn-outline{background:transparent;color:var(--green);border-color:var(--green)}
+.btn-outline:hover{background:var(--green-bg)}
+.btn-danger{background:var(--red);color:#fff;border-color:var(--red)}
+.btn-danger:hover{background:#DC2626}
+.btn-ghost{background:transparent;color:var(--text-muted);border-color:var(--border)}
+.btn-ghost:hover{background:var(--bg);color:var(--text)}
+.btn-sm{padding:.35rem .75rem;font-size:.8rem}
+.btn-block{width:100%;justify-content:center}
+
+/* ── FORMS ── */
+.form-group{margin-bottom:1rem}
+.form-label{
+  display:block;font-size:.82rem;font-weight:600;
+  color:var(--text);margin-bottom:.35rem;
+}
+.form-control{
+  width:100%;padding:.6rem .9rem;
+  border:2px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--white);color:var(--text);
+  font-size:.9rem;transition:border .15s;
+  outline:none;
+}
+.form-control:focus{border-color:var(--green)}
+.form-control.is-invalid{border-color:var(--red)}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;padding-right:2rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-hint{font-size:.75rem;color:var(--text-muted);margin-top:.25rem}
+.error-list{list-style:none;margin-top:.3rem}
+.error-list li{font-size:.78rem;color:var(--red);padding:.15rem 0}
+.field-errors{font-size:.78rem;color:var(--red);margin-top:.2rem}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.87rem}
+thead{background:var(--green)}
+thead th{color:#fff;padding:.7rem 1rem;text-align:left;font-weight:600;font-size:.82rem;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--green-bg)}
+td{padding:.65rem 1rem;vertical-align:middle}
+
+/* ── BADGES ── */
+.badge{
+  display:inline-flex;align-items:center;
+  padding:.2rem .55rem;border-radius:99px;
+  font-size:.72rem;font-weight:700;
+}
+.badge-green{background:var(--green-bg);color:var(--green-dark)}
+.badge-amber{background:var(--amber-light);color:var(--amber-dark)}
+.badge-red{background:var(--red-bg);color:#B91C1C}
+.badge-grey{background:#F3F4F6;color:#374151}
+.badge-blue{background:#EFF6FF;color:#1D4ED8}
+
+/* ── ALERTS ── */
+.alert{
+  padding:.8rem 1rem;border-radius:var(--radius-sm);
+  font-size:.88rem;margin-bottom:1rem;
+  display:flex;align-items:flex-start;gap:.6rem;
+}
+.alert-success{background:#DCFCE7;color:#166534;border-left:4px solid var(--green)}
+.alert-error{background:var(--red-bg);color:#991B1B;border-left:4px solid var(--red)}
+.alert-warning{background:var(--amber-light);color:#92400E;border-left:4px solid var(--amber)}
+.alert-info{background:#EFF6FF;color:#1E40AF;border-left:4px solid #3B82F6}
+
+/* ── PAGE HEADER ── */
+.page-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem;
+}
+.page-title{
+  font-family:'Sora',sans-serif;font-weight:800;font-size:1.5rem;
+  color:var(--text);
+}
+.page-subtitle{font-size:.85rem;color:var(--text-muted);margin-top:.2rem}
+
+/* ── MODAL ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:999;
+  background:rgba(0,0,0,.45);backdrop-filter:blur(3px);
+  align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--white);border-radius:var(--radius);
+  padding:1.5rem;width:90%;max-width:420px;
+  box-shadow:var(--shadow-lg);
+}
+.modal-title{
+  font-family:'Sora',sans-serif;font-weight:700;font-size:1.1rem;
+  margin-bottom:.75rem;
+}
+.modal-body{font-size:.9rem;color:var(--text-muted);margin-bottom:1.25rem}
+.modal-actions{display:flex;gap:.75rem;justify-content:flex-end}
+
+/* ── FILTER BAR ── */
+.filter-bar{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1rem;
+  margin-bottom:1rem;
+  display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end;
+}
+.filter-group{flex:1;min-width:130px}
+.filter-label{font-size:.75rem;font-weight:600;color:var(--text-muted);margin-bottom:.3rem}
+
+/* ── EMPTY STATE ── */
+.empty-state{
+  text-align:center;padding:3rem 1rem;
+  color:var(--text-muted);
+}
+.empty-state .empty-icon{font-size:3rem;margin-bottom:.75rem}
+.empty-state h3{font-size:1rem;font-weight:600;margin-bottom:.4rem;color:var(--text)}
+.empty-state p{font-size:.875rem;margin-bottom:1.25rem}
+
+/* ── TASK ITEMS ── */
+.task-item{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.75rem;border-radius:var(--radius-sm);
+  border:1px solid var(--border);margin-bottom:.5rem;
+  background:var(--white);transition:all .15s;
+}
+.task-item:hover{border-color:var(--green);box-shadow:var(--shadow)}
+.task-item.overdue{border-color:var(--red);background:var(--red-bg)}
+.task-item.overdue .task-date{color:var(--red)}
+.task-date{font-size:.75rem;font-weight:700;color:var(--green);min-width:72px}
+.task-title{font-size:.88rem;font-weight:600;flex:1}
+.task-cow{font-size:.75rem;color:var(--text-muted)}
+
+/* ── PRIORITY DOTS ── */
+.priority-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+}
+.priority-urgent{background:#EF4444}
+.priority-high{background:#F97316}
+.priority-medium{background:#F9A825}
+.priority-low{background:#6B7280}
+
+/* ── INCOME / EXPENSE ── */
+.amount-income{color:#16A34A;font-weight:700}
+.amount-expense{color:#DC2626;font-weight:700}
+
+/* ── COW STATUS ── */
+.status-active{color:#16A34A;font-weight:600}
+.status-dry{color:#92400E;font-weight:600}
+.status-pregnant{color:#7C3AED;font-weight:600}
+.status-sold{color:#6B7280;font-weight:600}
+.status-deceased{color:#111;font-weight:600}
+
+/* ── CHART CONTAINER ── */
+.chart-container{position:relative;height:220px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  body{padding-bottom:calc(var(--bottom-nav-h) + 8px)}
+  .sidebar{display:none}
+  .bottom-nav{display:block}
+  .main{padding:1rem .75rem}
+  .form-row{grid-template-columns:1fr}
+  .metrics-grid{grid-template-columns:repeat(2,1fr)}
+  .page-header{flex-direction:column;align-items:flex-start}
+  .table-wrap{font-size:.8rem}
+  td{padding:.5rem .75rem}
+  thead th{padding:.55rem .75rem}
+  .filter-bar{flex-direction:column}
+  .filter-group{min-width:100%}
+}
+@media(max-width:400px){
+  .metrics-grid{grid-template-columns:1fr 1fr}
+  .metric-value{font-size:1.4rem}
+}
+
+/* ── UTILS ── */
+.text-muted{color:var(--text-muted)}
+.text-green{color:var(--green)}
+.text-amber{color:var(--amber-dark)}
+.text-red{color:var(--red)}
+.font-bold{font-weight:700}
+.flex{display:flex}.items-center{align-items:center}.gap-2{gap:.5rem}.gap-3{gap:.75rem}
+.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}
+.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+</style>
+</head>
+<body>
+
+<!-- TOP NAVBAR -->
+<nav class="navbar">
+  <a href="{% url 'landing' %}" class="navbar-brand">
+    <span class="logo-icon">🐄</span>
+    <span>MilkFlow</span>
+  </a>
+  <div class="navbar-spacer"></div>
+  {% if user.is_authenticated %}
+  <div class="navbar-actions">
+    <div class="nav-user">
+      <div class="nav-avatar">{{ user.username|first|upper }}</div>
+      <span class="d-none-mobile">{{ user.username }}</span>
+    </div>
+    <a href="{% url 'logout' %}" class="nav-btn">Logout</a>
+  </div>
+  {% else %}
+  <div class="navbar-actions">
+    <a href="{% url 'login' %}" class="nav-btn">Login</a>
+    <a href="{% url 'register' %}" class="nav-btn" style="background:var(--amber);color:var(--green-dark)">Register</a>
+  </div>
+  {% endif %}
+</nav>
+
+{% if user.is_authenticated %}
+<div class="layout">
+  <!-- DESKTOP SIDEBAR -->
+  <aside class="sidebar">
+    <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+      <span class="sidebar-icon">📊</span> Dashboard
+    </a>
+    <div class="sidebar-section">Farm</div>
+    <a href="{% url 'cow_list' %}" class="sidebar-link {% if 'cow' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="sidebar-icon">🐄</span> Cows
+    </a>
+    <a href="{% url 'milk_list' %}" class="sidebar-link {% if 'milk' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="sidebar-icon">🥛</span> Milk Records
+    </a>
+    <a href="{% url 'health_list' %}" class="sidebar-link {% if 'health' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="sidebar-icon">💊</span> Health
+    </a>
+    <div class="sidebar-section">Management</div>
+    <a href="{% url 'task_list' %}" class="sidebar-link {% if 'task' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="sidebar-icon">✅</span> Tasks
+    </a>
+    <a href="{% url 'finance_list' %}" class="sidebar-link {% if 'finance' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="sidebar-icon">💰</span> Finances
+    </a>
+    <a href="{% url 'employee_list' %}" class="sidebar-link {% if 'employee' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="sidebar-icon">👥</span> Employees
+    </a>
+    <div class="sidebar-section">Reports</div>
+    <a href="{% url 'reports' %}" class="sidebar-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}">
+      <span class="sidebar-icon">📄</span> Reports
+    </a>
+    <a href="{% url 'farm_profile' %}" class="sidebar-link {% if 'farm' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="sidebar-icon">🏡</span> Farm Profile
+    </a>
+  </aside>
+  <main class="main">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+      <span>{% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% elif message.tags == 'warning' %}⚠️{% else %}ℹ️{% endif %}</span>
+      <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+{% else %}
+<main style="padding:0;background:var(--bg);min-height:calc(100vh - var(--nav-h))">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" style="margin:1rem">
+      {{ message }}
+    </div>
+    {% endfor %}
+{% endif %}
+
+    {% block content %}{% endblock %}
+
+{% if user.is_authenticated %}
+  </main>
+</div>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-items">
+    <a href="{% url 'dashboard' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+      <span class="nav-icon">📊</span><span>Home</span>
+    </a>
+    <a href="{% url 'cow_list' %}" class="bottom-nav-item {% if 'cow' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="nav-icon">🐄</span><span>Cows</span>
+    </a>
+    <a href="{% url 'milk_list' %}" class="bottom-nav-item {% if 'milk' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="nav-icon">🥛</span><span>Milk</span>
+    </a>
+    <a href="{% url 'finance_list' %}" class="bottom-nav-item {% if 'finance' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="nav-icon">💰</span><span>Finance</span>
+    </a>
+    <a href="{% url 'task_list' %}" class="bottom-nav-item {% if 'task' in request.resolver_match.url_name %}active{% endif %}">
+      <span class="nav-icon">✅</span><span>Tasks</span>
+    </a>
+  </div>
+</nav>
+{% else %}
+</main>
+{% endif %}
+
+<!-- DELETE MODAL (global) -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-title">⚠️ Confirm Delete</div>
+    <div class="modal-body" id="deleteModalBody">Are you sure you want to delete this record? This action cannot be undone.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeDeleteModal()">Cancel</button>
+      <form id="deleteForm" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">🗑️ Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function confirmDelete(url, label) {
+  document.getElementById('deleteForm').action = url;
+  document.getElementById('deleteModalBody').textContent = `Delete "${label}"? This cannot be undone.`;
+  document.getElementById('deleteModal').classList.add('open');
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+}
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+// Auto-dismiss alerts
+setTimeout(() => {
+  document.querySelectorAll('.alert').forEach(el => {
+    el.style.transition = 'opacity .5s';
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 500);
+  });
+}, 4000);
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

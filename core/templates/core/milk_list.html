@@ -1,0 +1,91 @@
+{% extends 'core/base.html' %}
+{% block title %}Milk Records{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">🥛 Milk Records</h1>
+    <p class="page-subtitle">{{ total_count }} record{{ total_count|pluralize }} · Total: {{ total_yield|floatformat:1 }}L</p>
+  </div>
+  <a href="{% url 'milk_add' %}" class="btn btn-primary">+ Record Milk</a>
+</div>
+
+<div class="filter-bar">
+  <form method="get" style="display:flex;gap:.75rem;flex-wrap:wrap;width:100%;align-items:flex-end">
+    <div class="filter-group">
+      <div class="filter-label">From Date</div>
+      <input name="date_from" type="date" class="form-control" value="{{ date_from }}"/>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">To Date</div>
+      <input name="date_to" type="date" class="form-control" value="{{ date_to }}"/>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Cow</div>
+      <select name="cow" class="form-control form-select">
+        <option value="">All Cows</option>
+        {% for cow in cow_list %}
+        <option value="{{ cow.pk }}" {% if cow_filter == cow.pk|stringformat:"s" %}selected{% endif %}>
+          {{ cow.tag_number }}{% if cow.name %} — {{ cow.name }}{% endif %}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Filter</button>
+    <a href="{% url 'milk_list' %}" class="btn btn-ghost">Clear</a>
+  </form>
+</div>
+
+{% if records %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Date</th><th>Cow</th><th>AM (L)</th><th>PM (L)</th><th>Total (L)</th><th>Notes</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+    {% for r in records %}
+    <tr>
+      <td>{{ r.record_date }}</td>
+      <td>
+        {% if r.cow %}
+          <a href="{% url 'cow_detail' r.cow.pk %}" style="color:var(--green);font-weight:600">{{ r.cow.tag_number }}</a>
+          {% if r.cow.name %}<span class="text-muted"> · {{ r.cow.name }}</span>{% endif %}
+        {% else %}<span class="text-muted">— General —</span>{% endif %}
+      </td>
+      <td>{{ r.am_yield|floatformat:1 }}</td>
+      <td>{{ r.pm_yield|floatformat:1 }}</td>
+      <td><strong style="color:var(--green)">{{ r.total_yield|floatformat:2 }}</strong></td>
+      <td class="text-muted truncate">{{ r.notes|default:"" }}</td>
+      <td>
+        <div style="display:flex;gap:.3rem">
+          <a href="{% url 'milk_edit' r.pk %}" class="btn btn-sm btn-outline">✏️</a>
+          <button class="btn btn-sm btn-danger" onclick="confirmDelete('{% url 'milk_delete' r.pk %}','milk record {{ r.record_date }}')">🗑</button>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- PAGINATION -->
+{% if total_pages > 1 %}
+<div style="display:flex;gap:.5rem;justify-content:center;margin-top:1rem;flex-wrap:wrap">
+  {% if page > 1 %}
+  <a href="?page={{ page|add:'-1' }}&date_from={{ date_from }}&date_to={{ date_to }}&cow={{ cow_filter }}" class="btn btn-ghost btn-sm">← Prev</a>
+  {% endif %}
+  <span style="padding:.35rem .75rem;font-size:.85rem;color:var(--text-muted)">Page {{ page }} of {{ total_pages }}</span>
+  {% if page < total_pages %}
+  <a href="?page={{ page|add:'1' }}&date_from={{ date_from }}&date_to={{ date_to }}&cow={{ cow_filter }}" class="btn btn-ghost btn-sm">Next →</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">🥛</div>
+  <h3>No milk records found</h3>
+  <p>{% if date_from or date_to %}Try adjusting your filters.{% else %}Start recording daily milk yields.{% endif %}</p>
+  <a href="{% url 'milk_add' %}" class="btn btn-primary">+ Record First Yield</a>
+</div>
+{% endif %}
+{% endblock %}

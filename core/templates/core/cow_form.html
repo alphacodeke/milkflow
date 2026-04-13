@@ -1,0 +1,77 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">🐄 {{ title }}</h1>
+  </div>
+  <a href="{% url 'cow_list' %}" class="btn btn-ghost">← Back to Cows</a>
+</div>
+<div style="max-width:640px">
+  <div class="card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tag Number *</label>
+          <input name="tag_number" type="text" class="form-control {% if form.tag_number.errors %}is-invalid{% endif %}"
+                 value="{{ form.tag_number.value|default:'' }}" placeholder="e.g. KE-001" required/>
+          {% if form.tag_number.errors %}<div class="field-errors">{{ form.tag_number.errors.0 }}</div>{% endif %}
+          <div class="form-hint">Unique identifier for this cow</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Name (Optional)</label>
+          <input name="name" type="text" class="form-control"
+                 value="{{ form.name.value|default:'' }}" placeholder="e.g. Daisy"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Breed</label>
+          <select name="breed" class="form-control form-select">
+            {% for val, label in form.fields.breed.choices %}
+            <option value="{{ val }}" {% if form.breed.value == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-control form-select">
+            {% for val, label in form.fields.status.choices %}
+            <option value="{{ val }}" {% if form.status.value == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Date of Birth</label>
+          <input name="date_of_birth" type="date" class="form-control"
+                 value="{{ form.date_of_birth.value|default:'' }}"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date Acquired</label>
+          <input name="date_acquired" type="date" class="form-control"
+                 value="{{ form.date_acquired.value|default:'' }}"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Weight (kg)</label>
+        <input name="weight_kg" type="number" step="0.1" min="0" class="form-control"
+               value="{{ form.weight_kg.value|default:'' }}" placeholder="e.g. 450.5"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea name="notes" class="form-control" rows="3" placeholder="Any special notes about this cow...">{{ form.notes.value|default:'' }}</textarea>
+      </div>
+      {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors.0 }}</div>
+      {% endif %}
+      <div style="display:flex;gap:.75rem;margin-top:.5rem">
+        <button type="submit" class="btn btn-primary">💾 Save Cow</button>
+        <a href="{% url 'cow_list' %}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

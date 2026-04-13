@@ -1,0 +1,198 @@
+{% extends 'core/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">📊 Dashboard</h1>
+    <p class="page-subtitle">{{ farm.name|default:"My Farm" }} — {{ today }}</p>
+  </div>
+  <a href="{% url 'milk_add' %}" class="btn btn-primary">🥛 Record Milk</a>
+</div>
+
+<!-- METRICS -->
+<div class="metrics-grid">
+  <div class="metric-card green">
+    <div class="metric-icon">🐄</div>
+    <div class="metric-value">{{ total_cows }}</div>
+    <div class="metric-label">Active Cows</div>
+    <div class="metric-sub">{{ herd_status.dry }} dry · {{ herd_status.pregnant }} pregnant</div>
+  </div>
+  <div class="metric-card amber">
+    <div class="metric-icon">🥛</div>
+    <div class="metric-value">{{ today_milk|floatformat:1 }}L</div>
+    <div class="metric-label">Today's Yield</div>
+    <div class="metric-sub">AM + PM combined</div>
+  </div>
+  <div class="metric-card {% if balance >= 0 %}green{% else %}red{% endif %}">
+    <div class="metric-icon">💰</div>
+    <div class="metric-value" style="font-size:1.3rem">KES {{ balance|floatformat:0 }}</div>
+    <div class="metric-label">Running Balance</div>
+    <div class="metric-sub">In: {{ income_total|floatformat:0 }} · Out: {{ expense_total|floatformat:0 }}</div>
+  </div>
+  <div class="metric-card {% if overdue_tasks_count > 0 %}red{% else %}blue{% endif %}">
+    <div class="metric-icon">✅</div>
+    <div class="metric-value">{{ overdue_tasks_count }}</div>
+    <div class="metric-label">Overdue Tasks</div>
+    <div class="metric-sub">{{ upcoming_tasks|length }} upcoming soon</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- MILK TREND CHART -->
+  <div class="card">
+    <div class="card-title">📈 7-Day Milk Production</div>
+    <div class="chart-container">
+      <canvas id="milkChart"></canvas>
+    </div>
+  </div>
+
+  <!-- UPCOMING TASKS -->
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between">
+      <span>✅ Upcoming Tasks</span>
+      <a href="{% url 'task_add' %}" class="btn btn-sm btn-outline">+ Add</a>
+    </div>
+    {% if upcoming_tasks %}
+      {% for task in upcoming_tasks %}
+      <div class="task-item {% if task.is_overdue %}overdue{% endif %}">
+        <div class="priority-dot priority-{{ task.priority }}"></div>
+        <div style="flex:1">
+          <div class="task-title">{{ task.title }}</div>
+          <div class="task-cow">
+            {% if task.cow %}🐄 {{ task.cow.tag_number }}{% else %}🌾 General{% endif %}
+            · {{ task.get_task_type_display }}
+          </div>
+        </div>
+        <div class="task-date">
+          {% if task.is_overdue %}<span class="text-red">⚠ Overdue</span>
+          {% elif task.days_until_due == 0 %}Today
+          {% elif task.days_until_due == 1 %}Tomorrow
+          {% else %}{{ task.due_date }}{% endif %}
+        </div>
+        <form method="post" action="{% url 'task_complete' task.pk %}">{% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-ghost" title="Mark complete">✓</button>
+        </form>
+      </div>
+      {% endfor %}
+      <a href="{% url 'task_list' %}" class="btn btn-outline btn-block" style="margin-top:.75rem">View All Tasks</a>
+    {% else %}
+      <div class="empty-state" style="padding:1.5rem">
+        <div class="empty-icon">🎉</div>
+        <h3>All clear!</h3>
+        <p>No upcoming tasks scheduled.</p>
+        <a href="{% url 'task_add' %}" class="btn btn-primary btn-sm">Schedule Task</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid-2" style="margin-top:1rem">
+  <!-- RECENT TRANSACTIONS -->
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between">
+      <span>💰 Recent Transactions</span>
+      <a href="{% url 'finance_add' %}" class="btn btn-sm btn-outline">+ Add</a>
+    </div>
+    {% if recent_transactions %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Category</th><th>Amount</th></tr></thead>
+        <tbody>
+        {% for txn in recent_transactions %}
+        <tr>
+          <td>{{ txn.transaction_date }}</td>
+          <td>{{ txn.get_category_display_name }}</td>
+          <td class="amount-{{ txn.transaction_type }}">
+            {% if txn.transaction_type == 'income' %}+{% else %}-{% endif %}{{ txn.amount|floatformat:2 }}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <a href="{% url 'finance_list' %}" class="btn btn-outline btn-block" style="margin-top:.75rem">View Ledger</a>
+    {% else %}
+    <div class="empty-state" style="padding:1.5rem">
+      <div class="empty-icon">📂</div>
+      <h3>No transactions yet</h3>
+      <a href="{% url 'finance_add' %}" class="btn btn-primary btn-sm">Add Transaction</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- RECENT HEALTH -->
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between">
+      <span>💊 Recent Health Events</span>
+      <a href="{% url 'health_add' %}" class="btn btn-sm btn-outline">+ Add</a>
+    </div>
+    {% if recent_health %}
+    {% for event in recent_health %}
+    <div class="task-item">
+      <span style="font-size:1.2rem">💊</span>
+      <div style="flex:1">
+        <div class="task-title">{{ event.get_event_type_display }}</div>
+        <div class="task-cow">
+          {% if event.cow %}🐄 {{ event.cow.tag_number }}{% else %}Herd{% endif %}
+          {% if event.vet_name %} · {{ event.vet_name }}{% endif %}
+        </div>
+      </div>
+      <span class="badge badge-{% if event.status == 'resolved' %}green{% elif event.status == 'open' %}amber{% else %}grey{% endif %}">
+        {{ event.get_status_display }}
+      </span>
+    </div>
+    {% endfor %}
+    <a href="{% url 'health_list' %}" class="btn btn-outline btn-block" style="margin-top:.75rem">View All</a>
+    {% else %}
+    <div class="empty-state" style="padding:1.5rem">
+      <div class="empty-icon">🏥</div>
+      <h3>No health events</h3>
+      <a href="{% url 'health_add' %}" class="btn btn-primary btn-sm">Record Event</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- QUICK ACTIONS -->
+<div class="card" style="margin-top:1rem">
+  <div class="card-title">⚡ Quick Actions</div>
+  <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+    <a href="{% url 'cow_add' %}" class="btn btn-outline">🐄 Add Cow</a>
+    <a href="{% url 'milk_add' %}" class="btn btn-primary">🥛 Record Milk</a>
+    <a href="{% url 'finance_add' %}" class="btn btn-amber">💰 Add Transaction</a>
+    <a href="{% url 'health_add' %}" class="btn btn-outline">💊 Log Health</a>
+    <a href="{% url 'task_add' %}" class="btn btn-outline">✅ Schedule Task</a>
+    <a href="{% url 'reports' %}" class="btn btn-outline">📄 Reports</a>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ctx = document.getElementById('milkChart').getContext('2d');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: {{ trend_labels|safe }},
+    datasets: [{
+      label: 'Milk Yield (L)',
+      data: {{ trend_data|safe }},
+      backgroundColor: 'rgba(46,125,50,0.25)',
+      borderColor: '#2E7D32',
+      borderWidth: 2,
+      borderRadius: 6,
+      hoverBackgroundColor: 'rgba(46,125,50,0.5)',
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {legend:{display:false}},
+    scales: {
+      y: {beginAtZero:true, grid:{color:'rgba(0,0,0,.06)'}, ticks:{font:{size:11}}},
+      x: {grid:{display:false}, ticks:{font:{size:11}}}
+    }
+  }
+});
+</script>
+{% endblock %}

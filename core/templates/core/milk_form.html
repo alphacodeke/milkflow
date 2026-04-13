@@ -1,0 +1,90 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="page-title">🥛 {{ title }}</h1></div>
+  <a href="{% url 'milk_list' %}" class="btn btn-ghost">← Back</a>
+</div>
+
+<div style="max-width:560px">
+  <div class="card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Cow (Optional)</label>
+        <select name="cow" class="form-control form-select">
+          <option value="">— Herd / General Record —</option>
+          {% for cow in form.fields.cow.queryset %}
+          <option value="{{ cow.pk }}"
+            {% if form.cow.value|stringformat:"s" == cow.pk|stringformat:"s" %}selected{% endif %}>
+            {{ cow.tag_number }}{% if cow.name %} — {{ cow.name }}{% endif %} ({{ cow.breed }})
+          </option>
+          {% endfor %}
+        </select>
+        <div class="form-hint">Leave blank to record a general herd total</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Record Date *</label>
+        <input name="record_date" type="date" class="form-control"
+               value="{{ form.record_date.value|default:'' }}" required/>
+        {% if form.record_date.errors %}<div class="field-errors">{{ form.record_date.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="card" style="background:var(--bg);padding:1rem;margin-bottom:1rem">
+        <div class="card-title" style="font-size:.9rem;margin-bottom:.75rem">🕐 Daily Yields</div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">☀️ Morning (AM) — Litres</label>
+            <input id="am_yield" name="am_yield" type="number" step="0.1" min="0"
+                   class="form-control {% if form.am_yield.errors %}is-invalid{% endif %}"
+                   value="{{ form.am_yield.value|default:'0' }}"
+                   placeholder="0.0" oninput="calcTotal()"/>
+            {% if form.am_yield.errors %}<div class="field-errors">{{ form.am_yield.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">🌙 Evening (PM) — Litres</label>
+            <input id="pm_yield" name="pm_yield" type="number" step="0.1" min="0"
+                   class="form-control {% if form.pm_yield.errors %}is-invalid{% endif %}"
+                   value="{{ form.pm_yield.value|default:'0' }}"
+                   placeholder="0.0" oninput="calcTotal()"/>
+            {% if form.pm_yield.errors %}<div class="field-errors">{{ form.pm_yield.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div style="margin-top:.75rem;padding:.75rem 1rem;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:rgba(255,255,255,.85);font-size:.85rem;font-weight:600">Daily Total</span>
+          <span id="total_display" style="color:#fff;font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem">0.0 L</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes (Optional)</label>
+        <textarea name="notes" class="form-control" rows="2"
+                  placeholder="Any observations, issues...">{{ form.notes.value|default:'' }}</textarea>
+      </div>
+
+      {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors.0 }}</div>
+      {% endif %}
+
+      <div style="display:flex;gap:.75rem">
+        <button type="submit" class="btn btn-primary">💾 Save Record</button>
+        <a href="{% url 'milk_list' %}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function calcTotal() {
+  const am = parseFloat(document.getElementById('am_yield').value) || 0;
+  const pm = parseFloat(document.getElementById('pm_yield').value) || 0;
+  document.getElementById('total_display').textContent = (am + pm).toFixed(1) + ' L';
+}
+// Run on page load for edit form
+calcTotal();
+</script>
+{% endblock %}

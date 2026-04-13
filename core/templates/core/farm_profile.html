@@ -1,0 +1,75 @@
+{% extends 'core/base.html' %}
+{% block title %}Farm Profile{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">🏡 Farm Profile</h1>
+    <p class="page-subtitle">Update your farm's information</p>
+  </div>
+</div>
+<div style="max-width:600px">
+  <div class="card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Farm Name *</label>
+        <input name="name" type="text" class="form-control {% if form.name.errors %}is-invalid{% endif %}"
+               value="{{ form.name.value|default:'' }}" placeholder="Sunrise Dairy Farm" required/>
+        {% if form.name.errors %}<div class="field-errors">{{ form.name.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Location</label>
+          <input name="location" type="text" class="form-control"
+                 value="{{ form.location.value|default:'' }}" placeholder="Nakuru, Kenya"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input name="phone" type="tel" class="form-control"
+                 value="{{ form.phone.value|default:'' }}" placeholder="+254 7XX XXX XXX"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input name="email" type="email" class="form-control"
+                 value="{{ form.email.value|default:'' }}" placeholder="farm@example.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Registration Number</label>
+          <input name="registration_number" type="text" class="form-control"
+                 value="{{ form.registration_number.value|default:'' }}" placeholder="KE/FARM/12345"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Established Date</label>
+        <input name="established_date" type="date" class="form-control"
+               value="{{ form.established_date.value|default:'' }}"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea name="notes" class="form-control" rows="3"
+                  placeholder="Additional farm details...">{{ form.notes.value|default:'' }}</textarea>
+      </div>
+      {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors.0 }}</div>
+      {% endif %}
+      <button type="submit" class="btn btn-primary">💾 Save Farm Profile</button>
+    </form>
+  </div>
+
+  <!-- ACCOUNT INFO -->
+  <div class="card" style="margin-top:1rem">
+    <div class="card-title">👤 Account</div>
+    <table style="width:100%;font-size:.9rem">
+      <tr><td style="color:var(--text-muted);padding:.35rem 0;width:35%">Username</td><td><strong>{{ user.username }}</strong></td></tr>
+      <tr><td style="color:var(--text-muted);padding:.35rem 0">Email</td><td>{{ user.email }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:.35rem 0">Full Name</td><td>{{ user.get_full_name|default:"—" }}</td></tr>
+      <tr><td style="color:var(--text-muted);padding:.35rem 0">Member Since</td><td>{{ user.date_joined|date:"Y-m-d" }}</td></tr>
+    </table>
+    <div style="margin-top:1rem">
+      <a href="{% url 'logout' %}" class="btn btn-danger btn-sm">🚪 Logout</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

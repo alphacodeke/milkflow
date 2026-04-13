@@ -1,0 +1,69 @@
+{% extends 'core/base.html' %}
+{% block title %}Cows{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">🐄 Herd Management</h1>
+    <p class="page-subtitle">{{ total }} cow{{ total|pluralize }} registered</p>
+  </div>
+  <a href="{% url 'cow_add' %}" class="btn btn-primary">+ Add Cow</a>
+</div>
+
+<div class="filter-bar">
+  <form method="get" style="display:flex;gap:.75rem;flex-wrap:wrap;width:100%;align-items:flex-end">
+    <div class="filter-group" style="flex:2;min-width:180px">
+      <div class="filter-label">Search</div>
+      <input name="q" type="text" class="form-control" placeholder="Tag, name, breed..." value="{{ search }}"/>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Status</div>
+      <select name="status" class="form-control form-select">
+        <option value="">All Status</option>
+        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+        <option value="dry" {% if status_filter == 'dry' %}selected{% endif %}>Dry</option>
+        <option value="pregnant" {% if status_filter == 'pregnant' %}selected{% endif %}>Pregnant</option>
+        <option value="sold" {% if status_filter == 'sold' %}selected{% endif %}>Sold</option>
+        <option value="deceased" {% if status_filter == 'deceased' %}selected{% endif %}>Deceased</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+    <a href="{% url 'cow_list' %}" class="btn btn-ghost">Clear</a>
+  </form>
+</div>
+
+{% if cows %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Tag</th><th>Name</th><th>Breed</th><th>Age</th><th>Status</th><th>Acquired</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+    {% for cow in cows %}
+    <tr>
+      <td><a href="{% url 'cow_detail' cow.pk %}" style="color:var(--green);font-weight:700">{{ cow.tag_number }}</a></td>
+      <td>{{ cow.name|default:"—" }}</td>
+      <td>{{ cow.breed }}</td>
+      <td>{{ cow.age_display }}</td>
+      <td><span class="status-{{ cow.status }}">{{ cow.get_status_display }}</span></td>
+      <td>{{ cow.date_acquired|default:"—" }}</td>
+      <td>
+        <div style="display:flex;gap:.35rem">
+          <a href="{% url 'cow_detail' cow.pk %}" class="btn btn-sm btn-ghost">👁</a>
+          <a href="{% url 'cow_edit' cow.pk %}" class="btn btn-sm btn-outline">✏️</a>
+          <button class="btn btn-sm btn-danger" onclick="confirmDelete('{% url 'cow_delete' cow.pk %}', '{{ cow.tag_number }}')">🗑</button>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">🐄</div>
+  <h3>No cows found</h3>
+  <p>{% if search %}Try a different search.{% else %}Add your first cow to get started.{% endif %}</p>
+  <a href="{% url 'cow_add' %}" class="btn btn-primary">+ Add First Cow</a>
+</div>
+{% endif %}
+{% endblock %}
