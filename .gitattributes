@@ -1,7 +1,10 @@
-# Ignore frontend templates and static files from language stats
+# Ignore frontend files completely from language stats
+
+# Django structure
 templates/** linguist-detectable=false
 static/** linguist-detectable=false
 
-# Optional: ignore standalone frontend files if any
+# Extra safety (any loose files)
 *.html linguist-detectable=false
 *.css linguist-detectable=false
+*.js linguist-detectable=false
