@@ -8,6 +8,17 @@
 
 A complete Django web application for dairy farm management.
 
+## 📸 Screenshots
+
+<p align="center">
+<img src="screenshots/milkflow-landing.png" width="45%" />
+  <img src="screenshots/milkflow-dashboard.png" width="45%" />
+</p>
+
+<p align="center">
+  <img src="screenshots/milkflow-login.png" width="45%" />
+</p>
+
 ## Tech Stack
 - **Backend**: Django 4.2+ with SQLite3
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
