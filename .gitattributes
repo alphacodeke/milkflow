@@ -1,0 +1,7 @@
+# Ignore frontend templates and static files from language stats
+templates/** linguist-detectable=false
+static/** linguist-detectable=false
+
+# Optional: ignore standalone frontend files if any
+*.html linguist-detectable=false
+*.css linguist-detectable=false
